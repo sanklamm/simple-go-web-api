@@ -22,10 +22,11 @@ func ConnectDatabase() {
 	}
 
 	if err != nil {
-		log.Fatal("Could not connect to the database!", err)
+		log.Fatal("Failed to connect to database!", err)
 	}
 
-	database.AutoMigrate(&models.Product{}, &models.User{})
+	database.AutoMigrate(&models.User{}, &models.Product{})
 
 	DB = database
 }
+
