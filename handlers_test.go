@@ -45,3 +45,64 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(t, user.Email, createdUser.Email)
 	assert.NotEqual(t, uuid.Nil, createdUser.ID)
 }
+
+func TestGetUsers(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := setupRouter()
+
+	// create a test user
+	user := models.User{Name: "Test User", Email: "test@example.com"}
+	database.DB.Create(&user)
+
+	// create a request to send to the endpoint
+	req, _ := http.NewRequest(http.MethodGet, "/users", nil)
+	resp := httptest.NewRecorder()
+
+	// perform the request
+	router.ServeHTTP(resp, req)
+
+	// Assertions
+	assert.Equal(t, http.StatusOK, resp.Code)
+
+	var users []models.User
+	err := json.Unmarshal(resp.Body.Bytes(), &users)
+	assert.Nil(t, err)
+	assert.GreaterOrEqual(t, len(users), 1)
+}
+
+func TestGetUserById(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := setupRouter()
+
+	// create a test user
+	user := models.User{Name: "Test User", Email: "testuser@example.com"}
+	database.DB.Create(&user)
+
+	// create a request to get the user by ID
+	req, _ := http.NewRequest(http.MethodGet, "/users/"+user.ID.String(), nil)
+	resp := httptest.NewRecorder()
+
+	// perform the request
+	router.ServeHTTP(resp, req)
+
+	// Assertions
+	var returnedUser models.User
+	err := json.Unmarshal(resp.Body.Bytes(), &returnedUser)
+	assert.Nil(t, err)
+	assert.Equal(t, user.Name, returnedUser.Name)
+}
+
+func TestGetUserInvalidID(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	router := setupRouter()
+
+	// create a request to get the user by ID
+	req, _ := http.NewRequest(http.MethodGet, "/users/invalid-uuid", nil)
+	resp := httptest.NewRecorder()
+
+	// perform the request
+	router.ServeHTTP(resp, req)
+
+	// Assertions
+	assert.Equal(t, http.StatusBadRequest, resp.Code)
+}
