@@ -17,6 +17,11 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Next()
 			return
 		}
+		// if the route is /login, skip the authentication
+		if c.FullPath() == "/login" {
+			c.Next()
+			return
+		}
 
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
