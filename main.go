@@ -2,10 +2,13 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	"github.com/sanklamm/simple-go-web-api/database"
+	"github.com/sanklamm/simple-go-web-api/middleware"
 	"github.com/sanklamm/simple-go-web-api/models"
 )
 
@@ -19,6 +22,9 @@ func main() {
 
 func setupRouter() *gin.Engine {
 	router := gin.Default()
+	router.Use(middleware.AuthMiddleware())
+
+	router.POST("/login", login)
 
 	router.GET("/users", getUsers)
 	router.GET("/users/:id", getUserById)
@@ -29,6 +35,36 @@ func setupRouter() *gin.Engine {
 	router.POST("/products", createProduct)
 
 	return router
+}
+
+func login(c *gin.Context) {
+	var user models.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Simplified user authentication
+	var dbUser models.User
+	if err := database.DB.Where("email = ?", user.Email).First(&dbUser).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	// Normally, you should check the password here
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": user.Email,
+		"exp":   jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
+	})
+
+	tokenString, err := token.SignedString(middleware.SecretKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
 // GET /users
