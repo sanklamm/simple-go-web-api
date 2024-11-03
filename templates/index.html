@@ -7,9 +7,17 @@
 </head>
 <body class="p-4">
     <h1 class="text-2xl font-bold mb-4">Users</h1>
-    <input type="text" id="search" placeholder="Search Users" class="border p-2 mb-4">
-    <div hx-get="/users" hx-trigger="load,keyup changed delay:500ms from:#search" hx-target="#user-list" hx-vals="{'name': $('#search').val()}"></div>
-    <div id="user-list"></div>
+    <input 
+        type="text" 
+        id="search" 
+        name="name"
+        placeholder="Search Users" 
+        class="border p-2 mb-4" 
+        hx-get="/users" 
+        hx-trigger="keyup changed delay:300ms" 
+        hx-target="#user-list"
+    />
+    <div id="user-list" hx-get="/users" hx-trigger="load"></div>
 </body>
 </html>
 
