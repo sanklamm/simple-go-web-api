@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +18,7 @@ import (
 func TestMain(m *testing.M) {
 	database.TestDB = true
 	database.ConnectDatabase()
-	m.Run()
+	os.Exit(m.Run())
 }
 
 func TestCreateUser(t *testing.T) {
