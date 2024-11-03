@@ -34,6 +34,9 @@ func setupRouter() *gin.Engine {
 	router.GET("/products/:id", getProductById)
 	router.POST("/products", createProduct)
 
+	router.LoadHTMLGlob("templates/*")
+	router.Static("/static", "./static")
+
 	return router
 }
 

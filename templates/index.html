@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Go Web API</title>
+    <script src="https://unpkg.com/htmx.org@1.9.0"></script>
+    <link href="/static/css/tailwind.css" rel="stylesheet">
+</head>
+<body class="p-4">
+    <h1 class="text-2xl font-bold mb-4">Users</h1>
+    <input type="text" id="search" placeholder="Search Users" class="border p-2 mb-4">
+    <div hx-get="/users" hx-trigger="load,keyup changed delay:500ms from:#search" hx-target="#user-list" hx-vals="{'name': $('#search').val()}"></div>
+    <div id="user-list"></div>
+</body>
+</html>
+
