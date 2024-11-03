@@ -1,6 +1,10 @@
 package main
 
 import (
+	"embed"
+	"html/template"
+	"io/fs"
+	"log"
 	"net/http"
 	"time"
 
@@ -11,6 +15,12 @@ import (
 	"github.com/sanklamm/simple-go-web-api/middleware"
 	"github.com/sanklamm/simple-go-web-api/models"
 )
+
+//go:embed templates/*
+var templatesFS embed.FS
+
+//go:embed all:static
+var staticFS embed.FS
 
 func main() {
 	database.ConnectDatabase()
@@ -24,6 +34,18 @@ func setupRouter() *gin.Engine {
 	router := gin.Default()
 	router.Use(middleware.AuthMiddleware())
 
+	staticSubFS, err := fs.Sub(staticFS, "static")
+	if err != nil {
+		log.Fatalf("Failed to create sub file system: %v", err)
+	}
+
+	// Load HTML templates from the embedded file system
+	router.SetHTMLTemplate(template.Must(template.ParseFS(templatesFS, "templates/*.html")))
+
+	// Serve static files from the embedded file system
+	router.StaticFS("/static", http.FS(staticSubFS))
+	// router.Static("/static", "./static")
+
 	router.POST("/login", login)
 
 	router.GET("/", home)
@@ -35,9 +57,6 @@ func setupRouter() *gin.Engine {
 	router.GET("/products", getProducts)
 	router.GET("/products/:id", getProductById)
 	router.POST("/products", createProduct)
-
-	router.LoadHTMLGlob("templates/*")
-	router.Static("/static", "./static")
 
 	return router
 }
