@@ -26,6 +26,8 @@ func setupRouter() *gin.Engine {
 
 	router.POST("/login", login)
 
+	router.GET("/", home)
+
 	router.GET("/users", getUsers)
 	router.GET("/users/:id", getUserById)
 	router.POST("/users", createUser)
@@ -38,6 +40,10 @@ func setupRouter() *gin.Engine {
 	router.Static("/static", "./static")
 
 	return router
+}
+
+func home(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", gin.H{})
 }
 
 func login(c *gin.Context) {
@@ -81,7 +87,11 @@ func getUsers(c *gin.Context) {
 		query = query.Where("name LIKE ?", "%"+name+"%")
 	}
 	query.Find(&users)
-	c.JSON(http.StatusOK, users)
+	if c.GetHeader("Hx-Request") != "" {
+		c.HTML(http.StatusOK, "users.html", gin.H{"users": users})
+	} else {
+		c.JSON(http.StatusOK, users)
+	}
 }
 
 // GET /users/:id

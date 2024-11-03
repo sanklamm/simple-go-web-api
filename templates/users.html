@@ -1,0 +1,9 @@
+{{range .users}}
+<div class="p-2 border-b">
+    <p><strong>{{.Name}}</strong></p>
+    <p>{{.Email}}</p>
+</div>
+{{else}}
+<p>No users found.</p>
+{{end}}
+
